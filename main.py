@@ -4,11 +4,15 @@ import json
 import datetime
 import random
 import asyncio
+from flask import Flask
+from threading import Thread
 from discord.ext import commands # We want to be able to use commands
 from dotenv import load_dotenv
 from slots import play_slots
 from blackjack import play_blackjack
 from roulette import play_roulette
+from coinflip import start_open_coinflip
+from mines import play_mines
 
 
 # Load token from .env
@@ -21,6 +25,24 @@ intents.message_content = True
 bot = discord.Bot(intents=intents)
 
 ECONOMY_FILE = "economy.json"
+
+# Creating a flask server instance
+app = Flask('') # using default name
+
+# Define a route (web page) for the root URL
+@app.route('/')
+def home():
+  return "I'm alive" # This shows up when you go to the web page
+
+# Define a function to run the Flask app
+def run():
+  app.run(host='0.0.0.0', port=8080)
+
+# Define a function to keep the Flask app alive
+def keep_alive():
+  # Create and start a thread to run the Flask app
+  t = Thread(target=run)
+  t.start()
 
 # ---------------------------- CLASS DEFINITIONS ----------------------------
 
@@ -37,7 +59,6 @@ def load_data():
 def save_data(data):
   with open(ECONOMY_FILE, "w") as f:
     json.dump(data, f, indent=4)
-
 
 # Get or create user balance
 def get_balance(user_id):
@@ -58,33 +79,37 @@ def update_balance(user_id, amount):
   save_data(data)
 
 # ---------------------------- GENERAL COMMANDS ----------------------------
-
+      
 # Command: !balance
-@bot.command()
+@bot.slash_command(name="balance", description="Check your balance")
 async def balance(ctx):
   bal = get_balance(ctx.author.id)
-  await ctx.send(f"💰 {ctx.author.mention}, you have **{bal} coins**!")
+  await ctx.respond(f"💰 {ctx.author.mention}, you have **{bal} coins**!")
   
 #Command: !daily
-@bot.command()
+@bot.slash_command(name="daily", description="Claim your daily coins!")
 async def daily(ctx):
-  user_id = str(ctx.author.id)
-  data = load_data()
+    user_id = str(ctx.author.id)
+    data = load_data()
 
-  today = datetime.date.today().isoformat()
-  user_data = data.get(user_id, {"coins": 0, "last_daily": "2000-01-01"})
+    today = datetime.date.today().isoformat()
+    user_data = data.get(user_id, {"coins": 1000, "last_daily": "2000-01-01"})
 
-  if user_data["last_daily"] == today:
-    await ctx.send(f"❌{ctx.author.mention}, you've already claimed your daily coins today!")
-  else:
-    user_data["coins"] += 100 # Daily reward
-    user_data["last_daily"] = today
-    data[user_id] = user_data
-    save_data(data)
-    await ctx.send(f"💰 {ctx.author.mention}, you've claimed your daily coins! You now have **{user_data['coins']} coins**!")
+    if user_id not in data:
+        data[user_id] = user_data  # save the initial 1000 coins
+        save_data(data)
+
+    if user_data["last_daily"] == today:
+        await ctx.respond(f"❌ {ctx.author.mention}, you've already claimed your daily coins today!")
+    else:
+        user_data["coins"] += 100
+        user_data["last_daily"] = today
+        data[user_id] = user_data
+        save_data(data)
+        await ctx.respond(f"💰 {ctx.author.mention}, you've claimed your daily coins! You now have **{user_data['coins']} coins**!")
 
 # Command: !leaderboard
-@bot.command()
+@bot.slash_command(name="leaderboard", description="View the top coin holders!")
 async def leaderboard(ctx):
   data = load_data()
   if not data:
@@ -111,7 +136,7 @@ async def leaderboard(ctx):
     name = user.name if user else f"User {user_id}"
     message.append(f"**#{i}** - {name}: **{coins} coins**")
 
-  await ctx.send("\n".join(message))
+  await ctx.respond("\n".join(message))
 
 # ---------------------------- GAME COMMANDS - See Respective .py Files ----------------------------
 
@@ -140,15 +165,26 @@ async def roulette(ctx, bet: int, choice: str):
 
 # ---------- END ROULETTE COMMAND ----------
 
+# ---------- Command: !c <bet> ----------
+@bot.slash_command(name="cf", description="Open coin flip challenge!")
+async def coinflip(ctx: discord.ApplicationContext, bet: int):
+  await start_open_coinflip(ctx, bet, load_data, save_data)
 
+# ---------- END COINFLIP COMMAND ----------
+
+@bot.slash_command(name="mines", description="Play a game of Mines!")
+async def mines(ctx, bet: int, mines: int):
+  await play_mines(ctx, bet, mines, load_data, save_data, bot)
 
 # When bot is good to go
 @bot.event
 async def on_ready():
   print(f"{bot.user} is ready and online!")
-
+  await bot.sync_commands()
+  
 # Run the bot
 if not TOKEN:
   raise ValueError("DISCORD_TOKEN not found in .env file.")
-  
+
+keep_alive()
 bot.run(TOKEN)
