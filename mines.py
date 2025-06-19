@@ -118,7 +118,7 @@ async def play_mines(ctx, bet, mines, load_data, save_data, bot):
             await message.edit(view=view)
 
 # Update user balance
-def update_balance(user_id, amount):
+def update_balance(user_id, amount, load_data, save_data):
   data = load_data()
   user_id_str = str(user_id)
   if user_id_str not in data:
