@@ -13,6 +13,7 @@ from blackjack import play_blackjack
 from roulette import play_roulette
 from coinflip import start_open_coinflip
 from mines import play_mines
+from crash import play_crash
 
 
 # Load token from .env
@@ -175,6 +176,10 @@ async def coinflip(ctx: discord.ApplicationContext, bet: int):
 @bot.slash_command(name="mines", description="Play a game of Mines!")
 async def mines(ctx, bet: int, mines: int):
   await play_mines(ctx, bet, mines, load_data, save_data, bot)
+
+@bot.slash_command(name="crash", description="Play Crash!")
+async def crash(ctx, bet: int):
+  await play_crash(ctx, bet, load_data, save_data)
 
 # When bot is good to go
 @bot.event
