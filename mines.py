@@ -123,5 +123,5 @@ def update_balance(user_id, amount, load_data, save_data):
   user_id_str = str(user_id)
   if user_id_str not in data:
     data[user_id_str] = {"coins": 1000, "last_daily": "2000-01-01"} # Start with 1000 coins
-  data[user_id_str]["coins"] = amount
+  data[user_id_str]["coins"] += amount
   save_data(data)
