@@ -1,6 +1,7 @@
 import discord
 import random
 import asyncio
+import math
 
 class CrashView(discord.ui.View):
     def __init__(self, player, bet, save_data):
@@ -40,6 +41,8 @@ class CrashView(discord.ui.View):
             view=self
         )
 
+        await asyncio.sleep(0.5)
+
 async def play_crash(ctx, bet, load_data, save_data):
     user_id = str(ctx.author.id)
     data = load_data()
@@ -58,17 +61,24 @@ async def play_crash(ctx, bet, load_data, save_data):
     await ctx.defer()
 
     # Send the initial game message with multiplier and buttons
-
     message = await ctx.followup.send(f"Crash game started! Multiplier: x1.00", view=view)
     await asyncio.sleep(0.7)
 
     # Randomly choose a crash multiplier between 1.02x and 20.0x
-    crash_point = random.uniform(1.02, 20.0)
+    def get_skewed_crash_point():
+        r = random.random()
+        skewed = 1.02 + (5.0 - 1.02) * (1 - r) ** 3.5
+        return round(skewed, 2)
+    
+    crash_point = max(get_skewed_crash_point(), 1.05)
 
     # Main game loop: increment multiplier until crash or cashout
+    tick = 0
     while not view.crashed and not view.cashout:
         await asyncio.sleep(0.1)  # Wait 0.2 seconds between multiplier increases
-        view.multiplier += 0.01    # Increase multiplier smoothly
+        tick += 1
+        acceleration = 0.005 * math.log(tick + 1)
+        view.multiplier += acceleration    # Accelerate multiplier smoothly
 
         if view.multiplier >= crash_point:
             # Crash condition met — game ends with loss
@@ -76,6 +86,11 @@ async def play_crash(ctx, bet, load_data, save_data):
             view.cashout_button.disabled = True  # Disable cashout button
             await message.edit(
                 content=f"💥 Crash! Multiplier reached x{crash_point:.2f}. You lost your bet.",
+                view=view
+            )
+        elif not view.cashout:
+            await message.edit(
+                content=f"# Multiplier: x{view.multiplier:.2f}",
                 view=view
             )
         else:
