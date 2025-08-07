@@ -74,7 +74,7 @@ async def play_crash(ctx, bet, load_data, save_data):
 
     # Main game loop: increment multiplier until crash or cashout
     tick = 0
-    while not view.crashed and not view.cashout:
+    while not view.crashed:
         await asyncio.sleep(0.1)  # Wait 0.2 seconds between multiplier increases
         tick += 1
         acceleration = 0.005 * math.log(tick + 1)
@@ -88,15 +88,12 @@ async def play_crash(ctx, bet, load_data, save_data):
                 content=f"💥 Crash! Multiplier reached x{crash_point:.2f}. You lost your bet.",
                 view=view
             )
-        elif not view.cashout:
-            await message.edit(
-                content=f"# Multiplier: x{view.multiplier:.2f}",
-                view=view
-            )
+        elif view.cashout:
+            break
         else:
             # Update message with new multiplier while game ongoing
             await message.edit(
-                content=f"# Multiplier: x{view.multiplier:.2f}",
+                content=f"# Multiplier: 📈 x{view.multiplier:.2f}",
                 view=view
             )
 
