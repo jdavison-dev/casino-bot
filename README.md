@@ -25,8 +25,8 @@ Built with Python and pycord.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/discord-casino-bot.git
-cd discord-casino-bot
+git clone https://github.com/jdavison-dev/casino-bot.git
+cd casino-bot
 
 ```
 ### 2. Make sure you have Python 3.9+ installed, install dependencies and libraries
