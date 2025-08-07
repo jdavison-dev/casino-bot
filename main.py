@@ -141,7 +141,7 @@ async def leaderboard(ctx):
 
 # ---------------------------- GAME COMMANDS - See Respective .py Files ----------------------------
 
-# ---------- Command: !slots <bet> ----------
+# ---------- Command: /slots <bet> ----------
 @bot.slash_command(name="slots", description="Bet on slots!")
 async def slots(
   ctx: discord.ApplicationContext,
@@ -152,34 +152,38 @@ async def slots(
 # ---------- END SLOTS COMMAND ----------
 
 
-# ---------- Command: !blackjack <bet> ----------
+# ---------- Command: /blackjack <bet> ----------
 @bot.slash_command(name="blackjack", description="Play blackjack!")
 async def blackjack(ctx, bet: int):
   await play_blackjack(ctx, bet, bot, load_data, save_data)
   
 # ---------- END BLACKJACK COMMAND ----------
 
-# ---------- Command: !roulette <bet> <color choice> ----------
+# ---------- Command: /roulette <bet> <color choice> ----------
 @bot.slash_command(name="roulette", description="Bet coins on red, black, or green.")
 async def roulette(ctx, bet: int, choice: str):
   await play_roulette(ctx, bet, choice, load_data, save_data)
 
 # ---------- END ROULETTE COMMAND ----------
 
-# ---------- Command: !c <bet> ----------
+# ---------- Command: /cf <bet> ----------
 @bot.slash_command(name="cf", description="Open coin flip challenge!")
 async def coinflip(ctx: discord.ApplicationContext, bet: int):
   await start_open_coinflip(ctx, bet, load_data, save_data)
 
 # ---------- END COINFLIP COMMAND ----------
 
+# ---------- Command: /mines <mines> <bet> ----------
 @bot.slash_command(name="mines", description="Play a game of Mines!")
 async def mines(ctx, bet: int, mines: int):
   await play_mines(ctx, bet, mines, load_data, save_data, bot)
+# ---------- END MINES COMMAND ----------
 
+# ---------- Command: /crash <bet> ----------
 @bot.slash_command(name="crash", description="Play Crash!")
 async def crash(ctx, bet: int):
   await play_crash(ctx, bet, load_data, save_data)
+# ---------- END CRASH COMMAND ----------
 
 # When bot is good to go
 @bot.event

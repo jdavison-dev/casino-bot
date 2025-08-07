@@ -4,7 +4,7 @@ import asyncio
 
 class OpenCoinFlipButtons(discord.ui.View):
     def __init__(self, challenger, bet, save_data, load_data):
-        super().__init__(timeout=60)
+        super().__init__(timeout=120)
         self.challenger = challenger
         self.bet = bet
         self.accepted = False

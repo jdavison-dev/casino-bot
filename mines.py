@@ -108,7 +108,7 @@ async def play_mines(ctx, bet, mines, load_data, save_data, bot):
                 view.reveal_mines()
                 winnings = int(bet * view.multiplier)
                 view.save_data(winnings)
-                await msg.channel.send(f"🎉 {ctx.author.mention} cashed out for **{winnings} coins**! Thanks for playing!", delete_after=10)
+                await msg.channel.send(f"🎉 {ctx.author.mention} cashed out for **{winnings} coins**! Thanks for playing!")
                 await message.edit(view=view)
     except asyncio.TimeoutError:
         if not view.game_over:
