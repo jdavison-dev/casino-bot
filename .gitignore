@@ -160,5 +160,14 @@ cython_debug/
 #.idea/
 
 # Files
-pyproject.toml
 economy.json
+.env
+
+# Python cache
+*.PyCharm
+
+# Lock files
+.uv.lock
+
+.DS_Store
+Thumbs.db
